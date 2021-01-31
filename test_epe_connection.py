@@ -7,6 +7,8 @@ from epe_connection import build_url, save_kmz, URL, HEADERS, make_params, make_
 from urllib import parse
 import json
 
+from response_mock import ResponseMock
+
 
 @pytest.mark.skip("Integration")
 @pytest.mark.parametrize('layer', (
@@ -24,37 +26,6 @@ def test_get_connection(layer):
 def test_build_url(url, layer, fmt):
     url = build_url(url, layer)
     assert url == f'https://gisepeprd2.epe.gov.br/arcgis/rest/services/SMA/WMS_Webmap_EPE/MapServer/{layer}/query?where=1%3D1&outFields=%2A&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f={fmt}'
-
-
-class ResponseMock:
-    def __init__(self, url):
-        self.status_code=200
-        self.url = url
-        self.fmt = self._set_fmt
-        self.content = self._set_content
-
-    def get(self, url, headers, verify):
-        pass
-
-    def json(self):
-        return json.dumps(self.content)
-
-    @property
-    def _set_fmt(self):
-        qs = parse.urlsplit(self.url)
-        qs_dict = dict(parse.parse_qsl(qs.query))
-        fmt = qs_dict['f']
-        return fmt
-
-    @property
-    def _set_content(self):
-        qs = parse.urlsplit(self.url)
-        qs_dict = dict(parse.parse_qsl(qs.query))
-        fmt = qs_dict['f']
-        if fmt=='kmz':
-            return _mock_result_kmz
-        else:
-            return _mock_result_geojson
 
 
 def get_mock(url, headers, verify=False):
